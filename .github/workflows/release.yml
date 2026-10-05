@@ -27,7 +27,7 @@ jobs:
 
       - name: Publicar projeto
         run: |
-          dotnet publish ./AC_Controller/AC_Controller.csproj `
+          dotnet publish ./iRacingWheelSync.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
@@ -44,4 +44,4 @@ jobs:
           name: Build ${{ github.run_number }}
           generate_release_notes: true
           files: |
-            publish/AC_Controller.exe
+            publish/iRacingWheelSync.exe
