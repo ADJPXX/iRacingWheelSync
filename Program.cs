@@ -20,6 +20,8 @@ public static class Program
 
         var lastState = "";
 
+        LogService.CheckLogFile();
+
         while (true)
         {
             Thread.Sleep(3000);
@@ -35,6 +37,8 @@ public static class Program
                 {
                     if (!wasRunningWarningShown)
                     {
+                        LogService.AddLog("iRacing running, close the UI (interface) and/or the simulator.");
+
                         Console.WriteLine("iRacing running, close the UI (interface) and/or the simulator.");
 
                         wasRunningWarningShown = true;
@@ -51,6 +55,8 @@ public static class Program
                 {
                     if (lastState != "FilesNotFound")
                     {
+                        LogService.AddLog("iRacing configuration files not found.");
+
                         Console.WriteLine("iRacing configuration files not found.");
 
                         lastState = "FilesNotFound";
@@ -67,6 +73,8 @@ public static class Program
                 {
                     if (lastState != "WheelNotFound")
                     {
+                        LogService.AddLog("Wheel connection was not found in your pc or is not configured in iRacing. No changes were made.");
+
                         Console.WriteLine("Wheel connection was not found in your pc or is not configured in iRacing. No changes were made.");
 
                         lastState = "WheelNotFound";
@@ -83,6 +91,8 @@ public static class Program
                 {
                     if (lastState != "InstanceError")
                     {
+                        LogService.AddLog("Could not retrieve InstanceGUID for the active wheel.");
+
                         Console.WriteLine("Could not retrieve InstanceGUID for the active wheel.");
 
                         lastState = "InstanceError";
@@ -97,6 +107,8 @@ public static class Program
                 {
                     if (lastState != "ConfigNotFound")
                     {
+                        LogService.AddLog("Wheel not found in iRacing configurations (joyCalib.yaml).");
+
                         Console.WriteLine("Wheel not found in iRacing configurations (joyCalib.yaml).");
 
                         lastState = "ConfigNotFound";
@@ -109,6 +121,12 @@ public static class Program
                 {
                     if (lastState != "Equal")
                     {
+                        LogService.AddLog($"Wheel found! Current InstanceGUID: {{{currentInstanceGuid.Value.ToString().ToUpper()}}}\n");
+
+                        LogService.AddLog($"Configured GUID in iRacing: {{{configuredGuid.Value.ToString().ToUpper()}}}\n");
+
+                        LogService.AddLog("GUIDs are equal. No synchronization required.");
+
                         Console.WriteLine($"Wheel found! Current InstanceGUID: {{{currentInstanceGuid.Value.ToString().ToUpper()}}}\n");
 
                         Console.WriteLine($"Configured GUID in iRacing: {{{configuredGuid.Value.ToString().ToUpper()}}}\n");
@@ -120,6 +138,12 @@ public static class Program
 
                     continue;
                 }
+
+                LogService.AddLog($"Wheel found! Current InstanceGUID: {{{currentInstanceGuid.Value.ToString().ToUpper()}}}\n");
+
+                LogService.AddLog($"Configured GUID in iRacing: {{{configuredGuid.Value.ToString().ToUpper()}}}\n");
+
+                LogService.AddLog("Different GUIDs! Starting migration in the configuration files...");
 
                 Console.WriteLine($"Wheel found! Current InstanceGUID: {{{currentInstanceGuid.Value.ToString().ToUpper()}}}\n");
 
@@ -135,6 +159,8 @@ public static class Program
 
                 File.WriteAllText(joyCalibPath, updatedJoyCalib);
 
+                LogService.AddLog("-> joyCalib.yaml updated with success.");
+
                 Console.WriteLine("-> joyCalib.yaml updated with success.");
 
                 var controlsBytes = File.ReadAllBytes(controlsPath);
@@ -147,6 +173,10 @@ public static class Program
 
                 File.WriteAllBytes(controlsPath, updatedControlsBytes);
 
+                LogService.AddLog("-> controls.cfg updated with success.");
+
+                LogService.AddLog("Update concluded! Now your wheel will be recognized by iRacing.");
+
                 Console.WriteLine("-> controls.cfg updated with success.");
 
                 Console.WriteLine("Update concluded! Now your wheel will be recognized by iRacing.");
@@ -157,6 +187,8 @@ public static class Program
             {
                 if (lastState != "Error")
                 {
+                    LogService.AddLog($"Erro no Main: {ex.Message}");
+
                     Console.WriteLine($"Erro no Main: {ex.Message}");
 
                     lastState = "Error";
@@ -201,10 +233,9 @@ public static class Program
         return null;
     }
 
-
     private static Guid? GetConfiguredInstanceGuid(string yamlContent, string productGuidStr)
     {
-        var pattern = $@"InstanceGUID:\s*'{{(?<guid>[A-Fa-f0-9\-]+)}}'\s*[\r\n]+.*ProductGUID:\s*'{{{productGuidStr}}}'";
+        var pattern = $@"InstanceGUID:\s*'{{(?<guid>[A-Fa-f0-9\-]+)}}'(?:(?!InstanceGUID).)*?ProductGUID:\s*'{{{productGuidStr}}}'";
 
         var match = Regex.Match(yamlContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
