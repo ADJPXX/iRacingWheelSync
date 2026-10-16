@@ -8,7 +8,7 @@ public static class LogService
     {
         var time = DateTime.Now;
 
-        File.AppendAllText(LogPath, $"[ {time:HH:mm:ss} ] {log}\n");
+        File.AppendAllText(LogPath, $"[ {time:G} ] {log}\n");
     }
 
 
