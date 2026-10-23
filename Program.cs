@@ -127,6 +127,8 @@ public static class Program
 
                         LogService.AddLog("GUIDs are equal. No synchronization required.");
 
+                        NotificationService.Send("GUIDs are equal. You can open iRacing now.");
+
                         Console.WriteLine($"Wheel found! Current InstanceGUID: {{{currentInstanceGuid.Value.ToString().ToUpper()}}}\n");
 
                         Console.WriteLine($"Configured GUID in iRacing: {{{configuredGuid.Value.ToString().ToUpper()}}}\n");
@@ -177,6 +179,8 @@ public static class Program
 
                 LogService.AddLog("Update concluded! Now your wheel will be recognized by iRacing.");
 
+                NotificationService.Send("Update concluded! Now your wheel will be recognized by iRacing.");
+
                 Console.WriteLine("-> controls.cfg updated with success.");
 
                 Console.WriteLine("Update concluded! Now your wheel will be recognized by iRacing.");
@@ -188,6 +192,8 @@ public static class Program
                 if (lastState != "Error")
                 {
                     LogService.AddLog($"Erro no Main: {ex.Message}");
+
+                    NotificationService.Send($"Erro no Main: {ex.Message}");
 
                     Console.WriteLine($"Erro no Main: {ex.Message}");
 
